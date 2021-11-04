@@ -12,7 +12,7 @@
 #      PUNCTUAL_CURRENT_DIR_COLOUR=yellow;
 
 PUNCTUAL_SHOW_BLANK_LINE="${PUNCTUAL_SHOW_BLANK_LINE:-true}";
-PUNCTUAL_SHOW_TIMESTAMP="${PUNCTUAL_SHOW_TIMESTAMP:-true}";
+PUNCTUAL_SHOW_TIMESTAMP="${PUNCTUAL_SHOW_TIMESTAMP:-false}";
 PUNCTUAL_SHOW_USER="${PUNCTUAL_SHOW_USER:-true}";
 PUNCTUAL_SHOW_HOSTNAME="${PUNCTUAL_SHOW_HOSTNAME:-true}";
 PUNCTUAL_SHOW_CURRENT_DIR="${PUNCTUAL_SHOW_CURRENT_DIR:-true}";
@@ -25,16 +25,16 @@ PUNCTUAL_HOSTNAME_COLOUR="${PUNCTUAL_HOSTNAME_COLOUR:-green}";
 PUNCTUAL_CURRENT_DIR_COLOUR="${PUNCTUAL_CURRENT_DIR_COLOUR:-cyan}";
 PUNCTUAL_GIT_COLOUR="${PUNCTUAL_GIT_COLOUR:-magenta}";
 
-PUNCTUAL_TIMESTAMP_BOLD="${PUNCTUAL_TIMESTAMP_BOLD:-false}";
-PUNCTUAL_USER_BOLD="${PUNCTUAL_USER_BOLD:-false}";
-PUNCTUAL_ROOT_USER_BOLD="${PUNCTUAL_ROOT_USER_BOLD:-false}";
-PUNCTUAL_HOSTNAME_BOLD="${PUNCTUAL_HOSTNAME_BOLD:-false}";
+PUNCTUAL_TIMESTAMP_BOLD="${PUNCTUAL_TIMESTAMP_BOLD:-true}";
+PUNCTUAL_USER_BOLD="${PUNCTUAL_USER_BOLD:-true}";
+PUNCTUAL_ROOT_USER_BOLD="${PUNCTUAL_ROOT_USER_BOLD:-true}";
+PUNCTUAL_HOSTNAME_BOLD="${PUNCTUAL_HOSTNAME_BOLD:-true}";
 PUNCTUAL_CURRENT_DIR_BOLD="${PUNCTUAL_CURRENT_DIR_BOLD:-false}";
 PUNCTUAL_GIT_BOLD="${PUNCTUAL_GIT_BOLD:-false}";
 
 PUNCTUAL_TIMESTAMP_FORMAT="${PUNCTUAL_TIMESTAMP_FORMAT:-%H:%M:%S}"; # see man strftime
 
-PUNCTUAL_PROMPT="${PUNCTUAL_PROMPT:-→}";
+PUNCTUAL_PROMPT="${PUNCTUAL_PROMPT:-%#}";
 
 PUNCTUAL_GIT_SYMBOL_UNTRACKED="${PUNCTUAL_GIT_SYMBOL_UNTRACKED:-?}";
 PUNCTUAL_GIT_SYMBOL_ADDED="${PUNCTUAL_GIT_SYMBOL_ADDED:-+}";
@@ -94,7 +94,7 @@ punctualUser () {
 }
 
 punctualHostname () {
-    echo -n 'on';
+    echo -n 'at';
     echo -n ' ';
     punctualDecorate '%m' "${PUNCTUAL_HOSTNAME_COLOUR}" "${PUNCTUAL_HOSTNAME_BOLD}";
 }
@@ -109,7 +109,7 @@ punctualGitStatus () {
     PUNCTUAL_GIT_CURRENT_BRANCH=`git_current_branch | xargs echo -n`;
     PUNCTUAL_GIT_PROMPT_STATUS=`git_prompt_status | sed -E 's/!+/!/g' | xargs echo -n`;
     if [[ ! -z "${PUNCTUAL_GIT_CURRENT_BRANCH}" ]]; then
-        echo -n 'at';
+        echo -n 'on';
         echo -n ' ';
         punctualDecorate "${PUNCTUAL_GIT_CURRENT_BRANCH}" "${PUNCTUAL_GIT_COLOUR}" "${PUNCTUAL_GIT_BOLD}";
         if [[ ! -z "${PUNCTUAL_GIT_PROMPT_STATUS}" ]]; then
@@ -122,10 +122,17 @@ punctualTimestamp () {
     punctualDecorate "%D{${PUNCTUAL_TIMESTAMP_FORMAT}}" "${PUNCTUAL_TIMESTAMP_COLOUR}" "${PUNCTUAL_TIMESTAMP_BOLD}";
 }
 
-punctualPrompt () {
-    echo -n "%(?.%{$reset_color%}.%{$fg[red]%})";
-    echo -n "${PUNCTUAL_PROMPT}";
+eriizuStatus () {
+    echo -n "%(?.%{$fg[green]%}.%{$fg[red]%})";
+    echo -n "●";
     echo -n "%{$reset_color%}";
+    echo -n ' ';
+}
+
+punctualPrompt () {
+#     echo -n "%(?.%{$reset_color%}.%{$fg[red]%})";
+    echo -n "${PUNCTUAL_PROMPT}";
+#     echo -n "%{$reset_color%}";
     echo -n ' ';
 }
 
@@ -134,16 +141,17 @@ punctualBuildTheme () {
     if [[ ${PUNCTUAL_SHOW_BLANK_LINE} = true ]]; then
         punctualNewline;
     fi;
-    echo -n '  ';
+    eriizuStatus;
+#     echo -n '  ';
     if [[ ${PUNCTUAL_SHOW_TIMESTAMP} = true ]]; then
         punctualTimestamp;
         echo -n ' ';
     fi;
-    if [[ ${PUNCTUAL_SHOW_USER} = true ]]; then
+    if [[ $UID == 0 ]] || [[ -n "$SSH_CONNECTION" ]] || [[ -n "$SUDO_USER" ]]; then
         punctualUser;
         echo -n ' ';
     fi;
-    if [[ ${PUNCTUAL_SHOW_HOSTNAME} = true ]]; then
+    if [[ ${PUNCTUAL_SHOW_HOSTNAME} = true ]] &&  [[ -n "${SSH_CONNECTION}" ]]; then
         punctualHostname;
         echo -n ' ';
     fi;
