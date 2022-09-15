@@ -29,7 +29,7 @@ PUNCTUAL_TIMESTAMP_BOLD="${PUNCTUAL_TIMESTAMP_BOLD:-true}";
 PUNCTUAL_USER_BOLD="${PUNCTUAL_USER_BOLD:-true}";
 PUNCTUAL_ROOT_USER_BOLD="${PUNCTUAL_ROOT_USER_BOLD:-true}";
 PUNCTUAL_HOSTNAME_BOLD="${PUNCTUAL_HOSTNAME_BOLD:-true}";
-PUNCTUAL_CURRENT_DIR_BOLD="${PUNCTUAL_CURRENT_DIR_BOLD:-false}";
+PUNCTUAL_CURRENT_DIR_BOLD="${PUNCTUAL_CURRENT_DIR_BOLD:-true}";
 PUNCTUAL_GIT_BOLD="${PUNCTUAL_GIT_BOLD:-false}";
 
 PUNCTUAL_TIMESTAMP_FORMAT="${PUNCTUAL_TIMESTAMP_FORMAT:-%H:%M:%S}"; # see man strftime
@@ -147,10 +147,10 @@ punctualBuildTheme () {
         punctualTimestamp;
         echo -n ' ';
     fi;
-    if [[ $UID == 0 ]] || [[ -n "$SSH_CONNECTION" ]] || [[ -n "$SUDO_USER" ]]; then
+#    if [[ $UID == 0 ]] || [[ -n "$SSH_CONNECTION" ]] || [[ -n "$SUDO_USER" ]]; then
         punctualUser;
         echo -n ' ';
-    fi;
+#    fi;
     if [[ ${PUNCTUAL_SHOW_HOSTNAME} = true ]] &&  [[ -n "${SSH_CONNECTION}" ]]; then
         punctualHostname;
         echo -n ' ';
